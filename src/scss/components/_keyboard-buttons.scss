@@ -1,0 +1,64 @@
+@use '../abstracts/variables';
+
+.keyboard__button {
+	width: 60px;
+	height: 50px;
+	font-size: 18px;
+	color: variables.$color-button-text;
+	border: none;
+	outline: none;
+	user-select: none;
+	border-radius: 10px;
+	background-color: variables.$color-button;
+	box-shadow: 0 0 3px 0px variables.$color-dark;
+	transition: 0.3s;
+	cursor: pointer;
+
+	&:active {
+		background-color: variables.$color-dark-purple;
+	}
+}
+
+.keyboard__button_special {
+	background-color: variables.$color-special-button;
+}
+
+.active-button {
+	background-color: variables.$color-dark-purple;
+}
+
+.Backspace {
+	width: 140px;
+}
+
+.Delete {
+	width: 65px;
+}
+
+.Tab {
+	@extend .Delete;
+}
+
+.CapsLock {
+	width: 100px;
+}
+
+.Enter {
+	width: 170px;
+}
+
+.ShiftLeft {
+	width: 135px
+}
+
+.ShiftRight {
+	@extend .ShiftLeft;
+}
+
+.Space {
+	width: 486px;
+}
+
+.ControlRight {
+	width: 64px;
+}
