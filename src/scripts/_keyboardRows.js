@@ -9,6 +9,9 @@ const TEXTAREA = new ElementTemplate('textarea', 'form__textarea', FORM).appendE
 new ElementTemplate('p', 'section__info', SECTION).insertText('OS Windows. Switch language buttons: Win + space.');
 const KEYBOARD = new ElementTemplate('div', 'section__keyboard keyboard', SECTION).appendElement();
 
+let buttons = [];
+let isLowerCase = true;
+
 const ROW_1 = [
 	{ code: 'Backquote', key: 'ё', enKey: '`' },
 	{ code: 'Digit1', key: '1', shift: '!' },
@@ -90,7 +93,6 @@ const ROW_5 = [
 	{ code: 'ControlRight', key: 'Ctr' }
 ];
 
-
 const [
 	KEYBOARD_ROW_1,
 	KEYBOARD_ROW_2,
@@ -105,7 +107,6 @@ const [
 		new ElementTemplate('div', 'keyboard__row', KEYBOARD).appendElement()
 	];
 
-let buttons = [];
 
 ROW_1.forEach(item => {
 	const BUTTON = new ElementTemplate('button', `keyboard__button ${item.code}`, KEYBOARD_ROW_1).insertText(item.key);
@@ -145,4 +146,31 @@ ROW_5.forEach(item => {
 		BUTTON.classList.add('keyboard__button_special');
 	}
 	buttons.push(BUTTON);
+});
+
+document.addEventListener('keydown', (event) => {
+
+	if (event.code === 'CapsLock') {
+		buttons.forEach(item => {
+			if (!item.classList.contains('keyboard__button_special')) {
+				item.textContent = (isLowerCase) ? item.textContent.toUpperCase() : item.textContent.toLowerCase();
+			}
+		});
+		isLowerCase = !isLowerCase;
+	}
+
+	buttons.forEach(item => {
+		if (item.classList.contains(event.code)) {
+			item.classList.add('active-button');
+		}
+	});
+	
+});
+
+document.addEventListener('keyup', (event) => {
+	buttons.forEach(item => {
+		if (item.classList.contains(event.code)) {
+			item.classList.remove('active-button');
+		}
+	});
 });
