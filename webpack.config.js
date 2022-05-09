@@ -6,12 +6,12 @@ const isProduction = process.env.NODE_ENV == 'production';
 
 
 const stylesHandler = isProduction ? MiniCssExtractPlugin.loader : 'style-loader';
-
+const isDev = isProduction ? false : 'source-map';
 
 
 const config = {
     entry: './src/scripts/index.js',
-    devtool: 'source-map',
+    devtool: isDev,
     output: {
         clean: true,
         path: path.resolve(__dirname, 'dist'),

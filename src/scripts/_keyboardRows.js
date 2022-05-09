@@ -6,14 +6,22 @@ const SECTION = new ElementTemplate('section', 'section', MAIN).appendElement();
 new ElementTemplate('h1', 'section__title', SECTION).insertText('Virtual keyboard');
 const FORM = new ElementTemplate('form', 'section__form form', SECTION).appendElement();
 const TEXTAREA = new ElementTemplate('textarea', 'form__textarea', FORM).appendElement();
-new ElementTemplate('p', 'section__info', SECTION).insertText('OS Windows. Switch language buttons: Win + space.');
+new ElementTemplate('p', 'section__info', SECTION).insertText('OS Windows. Switch language buttons: Left Ctr + Left Alt.');
 const KEYBOARD = new ElementTemplate('div', 'section__keyboard keyboard', SECTION).appendElement();
+
+
 
 let buttons = [];
 let isLowerCase = true;
 
+let currentLanguage = (localStorage.getItem('currentLanguage')) ? localStorage.getItem('currentLanguage') : 'RU';
+
+let isCtrClicked = false;
+let isAltLeftClicked = false;
+let isShiftClicked = false;
+
 const ROW_1 = [
-	{ code: 'Backquote', key: 'ё', enKey: '`' },
+	{ code: 'Backquote', key: 'ё', enKey: '`', shiftEn: '~' },
 	{ code: 'Digit1', key: '1', shift: '!' },
 	{ code: 'Digit2', key: '2', shift: '"', shiftEn: '@' },
 	{ code: 'Digit3', key: '3', shift: '№', shiftEn: '#' },
@@ -79,8 +87,6 @@ const ROW_4 = [
 	{ code: 'ShiftRight', key: 'Shift' }
 ];
 
-
-
 const ROW_5 = [
 	{ code: 'ControlLeft', key: 'Ctr' },
 	{ code: 'MetaLeft', key: 'Win' },
@@ -92,6 +98,8 @@ const ROW_5 = [
 	{ code: 'ArrowRight', key: '→' },
 	{ code: 'ControlRight', key: 'Ctr' }
 ];
+
+const BUTTONS_PROPERTIES = [].concat(ROW_1, ROW_2, ROW_3, ROW_4, ROW_5);
 
 const [
 	KEYBOARD_ROW_1,
@@ -107,48 +115,275 @@ const [
 		new ElementTemplate('div', 'keyboard__row', KEYBOARD).appendElement()
 	];
 
-
 ROW_1.forEach(item => {
-	const BUTTON = new ElementTemplate('button', `keyboard__button ${item.code}`, KEYBOARD_ROW_1).insertText(item.key);
-	if (item.code === 'Backspace') {
-		BUTTON.classList.add('keyboard__button_special');
+	let button = new ElementTemplate('button', `keyboard__button ${item.code}`, KEYBOARD_ROW_1).insertText(item.key);
+
+	if (currentLanguage === 'EN' && item.enKey) {
+		button.textContent = item.enKey;
 	}
-	buttons.push(BUTTON);
+
+	if (item.code === 'Backspace') {
+		button.classList.add('keyboard__button_special');
+	}
+
+	buttons.push(button);
 });
 
 ROW_2.forEach(item => {
-	const BUTTON = new ElementTemplate('button', `keyboard__button ${item.code}`, KEYBOARD_ROW_2).insertText(item.key);
-	if (item.code === 'Tab' || item.code === 'Delete') {
-		BUTTON.classList.add('keyboard__button_special');
+	let button = new ElementTemplate('button', `keyboard__button ${item.code}`, KEYBOARD_ROW_2).insertText(item.key);
+
+	if (currentLanguage === 'EN' && item.enKey) {
+		button.textContent = item.enKey;
 	}
-	buttons.push(BUTTON);
+
+	if (item.code === 'Tab' || item.code === 'Delete') {
+		button.classList.add('keyboard__button_special');
+	}
+	buttons.push(button);
 });
 
 ROW_3.forEach(item => {
-	const BUTTON = new ElementTemplate('button', `keyboard__button ${item.code}`, KEYBOARD_ROW_3).insertText(item.key);
-	if (item.code === 'CapsLock' || item.code === 'Enter') {
-		BUTTON.classList.add('keyboard__button_special');
+	let button = new ElementTemplate('button', `keyboard__button ${item.code}`, KEYBOARD_ROW_3).insertText(item.key);
+
+	if (currentLanguage === 'EN' && item.enKey) {
+		button.textContent = item.enKey;
 	}
-	buttons.push(BUTTON);
+
+	if (item.code === 'CapsLock' || item.code === 'Enter') {
+		button.classList.add('keyboard__button_special');
+	}
+	buttons.push(button);
 });
 
 ROW_4.forEach(item => {
-	const BUTTON = new ElementTemplate('button', `keyboard__button ${item.code}`, KEYBOARD_ROW_4).insertText(item.key);
-	if (item.code === 'ShiftLeft' || item.code === 'ShiftRight') {
-		BUTTON.classList.add('keyboard__button_special');
+	let button = new ElementTemplate('button', `keyboard__button ${item.code}`, KEYBOARD_ROW_4).insertText(item.key);
+
+	if (currentLanguage === 'EN' && item.enKey) {
+		button.textContent = item.enKey;
 	}
-	buttons.push(BUTTON);
+
+	if (item.code === 'ShiftLeft' || item.code === 'ShiftRight') {
+		button.classList.add('keyboard__button_special');
+	}
+	buttons.push(button);
 });
 
 ROW_5.forEach(item => {
-	const BUTTON = new ElementTemplate('button', `keyboard__button ${item.code}`, KEYBOARD_ROW_5).insertText(item.key);
-	if (item.code === 'ControlLeft' || item.code === 'ControlRight' || item.code === 'MetaLeft' || item.code === 'AltLeft' || item.code === 'AltRight') {
-		BUTTON.classList.add('keyboard__button_special');
+	let button = new ElementTemplate('button', `keyboard__button ${item.code}`, KEYBOARD_ROW_5).insertText(item.key);
+
+	if (currentLanguage === 'EN' && item.enKey) {
+		button.textContent = item.enKey;
 	}
-	buttons.push(BUTTON);
+
+	if (
+		item.code === 'ControlLeft' ||
+		item.code === 'ControlRight' ||
+		item.code === 'MetaLeft' ||
+		item.code === 'AltLeft' ||
+		item.code === 'AltRight'
+	) {
+		button.classList.add('keyboard__button_special');
+	}
+	buttons.push(button);
+});
+
+KEYBOARD.addEventListener('click', (event) => {
+	TEXTAREA.focus();
+	if (event.target.classList.contains('keyboard__button')) {
+		
+		if (!event.target.classList.contains('keyboard__button_special')) {
+			TEXTAREA.setRangeText(event.target.textContent, TEXTAREA.selectionStart, TEXTAREA.selectionEnd, 'end');
+		}
+
+		if (event.target.classList.contains('Backspace') && TEXTAREA.selectionStart) {
+			TEXTAREA.setRangeText('', TEXTAREA.selectionStart - 1, TEXTAREA.selectionStart);
+		}
+
+		if (event.target.classList.contains('Delete')) {
+			TEXTAREA.setRangeText('', TEXTAREA.selectionStart, TEXTAREA.selectionStart + 1);
+		}
+
+		if (event.target.classList.contains('Enter')) {
+			TEXTAREA.setRangeText('\n', TEXTAREA.selectionStart, TEXTAREA.selectionEnd, 'end');
+		}
+
+		if (event.target.classList.contains('Tab')) {
+			TEXTAREA.setRangeText('    ', TEXTAREA.selectionStart, TEXTAREA.selectionEnd, 'end');
+		}
+
+		if (event.target.classList.contains('ControlLeft')) {
+			isCtrClicked = true;
+		}
+
+		if (event.target.classList.contains('CapsLock')) {
+			buttons.forEach(item => {
+				if (!item.classList.contains('keyboard__button_special')) {
+					item.textContent = (isLowerCase) ? item.textContent.toUpperCase() : item.textContent.toLowerCase();
+				}
+			});
+			isLowerCase = !isLowerCase;
+		}
+
+	}
+});
+
+KEYBOARD.addEventListener('mousedown', (event) => {
+	if (event.target.classList.contains('ShiftLeft') || event.target.classList.contains('ShiftRight')) {
+		buttons.forEach(item => {
+			if (!item.classList.contains('keyboard__button_special') && currentLanguage === 'RU') {
+				BUTTONS_PROPERTIES.forEach(prop => {
+					if (item.classList.contains(prop.code) && prop.shift) {
+						item.textContent = prop.shift;
+					}
+				});
+			} else if (!item.classList.contains('keyboard__button_special') && currentLanguage === 'EN') {
+				BUTTONS_PROPERTIES.forEach(prop => {
+					if (item.classList.contains(prop.code) && prop.shiftEn) {
+						item.textContent = prop.shiftEn;
+					} else if (item.classList.contains(prop.code) && prop.shift) {
+						item.textContent = prop.shift;
+					}
+				});
+			}
+		});
+
+		if (!isShiftClicked) {
+			isShiftClicked = true;
+			buttons.forEach(item => {
+				if (!item.classList.contains('keyboard__button_special')) {
+					item.textContent = (isLowerCase) ? item.textContent.toUpperCase() : item.textContent.toLowerCase();
+				}
+			});
+			isLowerCase = !isLowerCase;
+		}
+	}
+});
+
+KEYBOARD.addEventListener('mouseup', (event) => {
+	if (event.target.classList.contains('ShiftLeft') || event.target.classList.contains('ShiftRight')) {
+		isShiftClicked = false;
+		buttons.forEach(item => {
+			if (!item.classList.contains('keyboard__button_special') && currentLanguage === 'RU') {
+
+				BUTTONS_PROPERTIES.forEach(prop => {
+					if (item.classList.contains(prop.code)) {
+						item.textContent = prop.key;
+					}
+				});
+			} else if (!item.classList.contains('keyboard__button_special') && currentLanguage === 'EN') {
+				BUTTONS_PROPERTIES.forEach(prop => {
+					if (item.classList.contains(prop.code) && prop.shiftEn || item.classList.contains(prop.code) && prop.shift) {
+						item.textContent = prop.enKey || prop.key;
+					}
+				});
+			}
+		});
+		buttons.forEach(item => {
+			if (!item.classList.contains('keyboard__button_special')) {
+				item.textContent = (isLowerCase) ? item.textContent.toUpperCase() : item.textContent.toLowerCase();
+			}
+		});
+		isLowerCase = !isLowerCase;
+	}
 });
 
 document.addEventListener('keydown', (event) => {
+
+	if (document.activeElement !== TEXTAREA) {
+		buttons.forEach(item => {
+			if (!item.classList.contains('keyboard__button_special') && item.classList.contains(event.code)) {
+				TEXTAREA.setRangeText(item.textContent, TEXTAREA.selectionStart, TEXTAREA.selectionEnd, 'end');
+			}
+		});
+	} else {
+		event.preventDefault();
+		buttons.forEach(item => {
+			if (!item.classList.contains('keyboard__button_special') && item.classList.contains(event.code)) {
+				TEXTAREA.setRangeText(item.textContent, TEXTAREA.selectionStart, TEXTAREA.selectionEnd, 'end');
+			}
+		});
+	}
+
+	if (event.code === 'Backspace' && TEXTAREA.selectionStart) {
+		TEXTAREA.setRangeText('', TEXTAREA.selectionStart - 1, TEXTAREA.selectionStart);
+	}
+
+	if (event.code === 'Delete') {
+		TEXTAREA.setRangeText('', TEXTAREA.selectionStart, TEXTAREA.selectionStart + 1);
+	}
+
+	if (event.code === 'Enter') {
+		TEXTAREA.setRangeText('\n', TEXTAREA.selectionStart, TEXTAREA.selectionEnd, 'end');
+	}
+
+	if (event.code === 'Tab') {
+		TEXTAREA.setRangeText('    ', TEXTAREA.selectionStart, TEXTAREA.selectionEnd, 'end');
+	}
+
+	if (event.code === 'ControlLeft') {
+		isCtrClicked = true;
+	}
+
+	if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') {
+		buttons.forEach(item => {
+			if (!item.classList.contains('keyboard__button_special') && currentLanguage === 'RU') {
+				BUTTONS_PROPERTIES.forEach(prop => {
+					if (item.classList.contains(prop.code) && prop.shift) {
+						item.textContent = prop.shift;
+					}
+				});
+			} else if (!item.classList.contains('keyboard__button_special') && currentLanguage === 'EN') {
+				BUTTONS_PROPERTIES.forEach(prop => {
+					if (item.classList.contains(prop.code) && prop.shiftEn) {
+						item.textContent = prop.shiftEn;
+					} else if (item.classList.contains(prop.code) && prop.shift) {
+						item.textContent = prop.shift;
+					}
+				});
+			}
+		});
+
+		if (!isShiftClicked) {
+			isShiftClicked = true;
+			buttons.forEach(item => {
+				if (!item.classList.contains('keyboard__button_special')) {
+					item.textContent = (isLowerCase) ? item.textContent.toUpperCase() : item.textContent.toLowerCase();
+				}
+			});
+			isLowerCase = !isLowerCase;
+		}
+	}
+
+	if (event.code === 'AltLeft') {
+
+		isAltLeftClicked = true;
+
+		if (isCtrClicked && isAltLeftClicked && currentLanguage === 'RU') {
+
+			buttons.forEach(item => {
+				BUTTONS_PROPERTIES.forEach(prop => {
+					if (item.textContent.toLowerCase() === prop.key && prop.enKey) {
+						item.textContent = (isLowerCase) ? prop.enKey : prop.enKey.toUpperCase();
+					}
+				});
+			});
+			currentLanguage = 'EN';
+
+		} else if (isCtrClicked && isAltLeftClicked && currentLanguage === 'EN') {
+			buttons.forEach(item => {
+				BUTTONS_PROPERTIES.forEach(prop => {
+					if (item.textContent.toLowerCase() === prop.enKey) {
+						item.textContent = (isLowerCase) ? prop.key : prop.key.toUpperCase();
+					}
+				});
+			});
+			currentLanguage = 'RU';
+		}
+	}
+
+	if (event.code === 'AltLeft' || event.code === 'AltRight') {
+		event.preventDefault();
+	}
 
 	if (event.code === 'CapsLock') {
 		buttons.forEach(item => {
@@ -164,13 +399,50 @@ document.addEventListener('keydown', (event) => {
 			item.classList.add('active-button');
 		}
 	});
-	
+
 });
 
 document.addEventListener('keyup', (event) => {
+	if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') {
+		isShiftClicked = false;
+		buttons.forEach(item => {
+			if (!item.classList.contains('keyboard__button_special') && currentLanguage === 'RU') {
+
+				BUTTONS_PROPERTIES.forEach(prop => {
+					if (item.classList.contains(prop.code)) {
+						item.textContent = prop.key;
+					}
+				});
+			} else if (!item.classList.contains('keyboard__button_special') && currentLanguage === 'EN') {
+				BUTTONS_PROPERTIES.forEach(prop => {
+					if (item.classList.contains(prop.code) && prop.shiftEn || item.classList.contains(prop.code) && prop.shift) {
+						item.textContent = prop.enKey || prop.key;
+					}
+				});
+			}
+		});
+		buttons.forEach(item => {
+			if (!item.classList.contains('keyboard__button_special')) {
+				item.textContent = (isLowerCase) ? item.textContent.toUpperCase() : item.textContent.toLowerCase();
+			}
+		});
+		isLowerCase = !isLowerCase;
+	}
+
+	if (event.code === 'ControlLeft') {
+		isCtrClicked = false;
+	}
+	if (event.code === 'AltLeft') {
+		isAltLeftClicked = false;
+	}
+
 	buttons.forEach(item => {
 		if (item.classList.contains(event.code)) {
 			item.classList.remove('active-button');
 		}
 	});
+});
+
+window.addEventListener('beforeunload', () => {
+	localStorage.setItem('currentLanguage', currentLanguage);
 });
