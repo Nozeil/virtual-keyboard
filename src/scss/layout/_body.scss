@@ -1,0 +1,8 @@
+@use '../abstracts/variables';
+
+body {
+	box-sizing: border-box;
+	font-family: 'Roboto', sans-serif;
+	color: variables.$color-light;
+	background-color: variables.$color-dark-purple;
+}
