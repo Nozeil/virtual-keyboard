@@ -16,6 +16,7 @@
 
 	&:active {
 		background-color: variables.$color-dark-purple;
+		animation: pressing 0.3s ease-in-out forwards;
 	}
 }
 
@@ -25,6 +26,22 @@
 
 .active-button {
 	background-color: variables.$color-dark-purple;
+	animation: pressing 0.3s ease-in-out forwards;
+}
+
+@keyframes pressing {
+	0% {
+		transform: rotate(-2deg);
+	}
+
+	50% {
+		transform: rotate(2deg);
+	}
+
+	100% {
+		background-color: variables.$color-active;
+		transform: scale(0.92) rotate(0);
+	}
 }
 
 .Backspace {
